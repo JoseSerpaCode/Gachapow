@@ -1,3 +1,5 @@
+<img src="https://i.imgur.com/KxW5kAj.png">
+
 # 🎮 Gachapow V2.0
 
 > **Versión actual:** `v1.1.0-prealpha`  
