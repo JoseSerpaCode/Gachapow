@@ -53,3 +53,37 @@ dkms.conf
 
 # debug information files
 *.dwo
+
+# Build / Output directories
+build/
+bin/
+obj/
+out/
+dist/
+*.log
+
+# Assets
+# Ignora assets temporales o archivos fuente de edición
+assets/temp/
+*.psd
+*.xcf
+
+# Editor / IDE específicos
+
+# Visual Studio Code
+.vscode/
+
+# Archivos temporales o del sistema
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+
+# ===================================
+# 🧪 Raylib or SDL-specific builds
+# ===================================
+raylib/projects/
+raylib/bin/
+raylib/obj/
