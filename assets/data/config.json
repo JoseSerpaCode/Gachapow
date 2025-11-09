@@ -1,0 +1,16 @@
+{
+    "screen": {
+        "width": 600,
+        "height": 680,
+        "fullscreen": false,
+        "fps": 60
+    },
+    "audio": {
+        "master_volume": 0.7
+    },
+    "font": {
+        "path": "assets/fonts/arcade.ttf",
+        "size": 24
+    },
+    "title": "Gachapow"
+}
