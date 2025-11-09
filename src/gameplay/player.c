@@ -55,6 +55,6 @@ void DrawPlayer(Player *p)
     DrawTexturePro(p->texture, src, dst, origin, 0.0f, tint);
 }
 
-void UnloadPlayer(Player *p) {
-    UnloadTexture(p->texture);
+void UnloadPlayer(Player *player) {
+    (void)player; // silencia el warning
 }

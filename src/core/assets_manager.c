@@ -13,6 +13,7 @@ void Assets_Init(void)
     textures[TEX_PLAYER]         = LoadTexture("assets/images/player.png");
     textures[TEX_ENEMY]          = LoadTexture("assets/images/enemies/enemy.png");
     textures[TEX_LOGO]           = LoadTexture("assets/images/logo.png");
+    textures[TEX_HUD]            = LoadTexture("assets/images/hud/hud.png");
 }
 
 // retorna referencia a texture ya cargada

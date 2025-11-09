@@ -16,7 +16,7 @@ void InitEnemies(Enemy enemy[], int count, EnemyWave wave)
     Texture2D enemyTexture = GetTextureAsset(TEX_ENEMY);
 
     int screenW = GetScreenWidth();
-    int screenH = GetScreenHeight();
+    //int screenH = GetScreenHeight();
 
     for (int i = 0; i < count; i++)
     {

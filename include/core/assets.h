@@ -11,7 +11,7 @@ typedef enum {
     TEX_PLAYER,
     TEX_ENEMY,
     TEX_LOGO,
-
+    TEX_HUD,
     TEX_COUNT  // MUST be last → tamaño del array interno
 } TextureID;
 
@@ -24,5 +24,7 @@ Texture2D GetTextureAsset(TextureID id);
 
 // libera TODOS los assets cargados por Assets_Init()
 void Assets_Unload(void);
+
+void Assets_Init(void);
 
 #endif
