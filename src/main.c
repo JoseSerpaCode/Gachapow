@@ -4,7 +4,7 @@
 
 int main(void) {
     GameConfig config;
-    if (!LoadConfig("assets/data/config.json", &config)) {
+    if (!LoadConfig(CONFIG_PATH, &config)) {
         printf("Error al cargar configuración.\n");
         return -1;
     }
