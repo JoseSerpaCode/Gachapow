@@ -2,28 +2,14 @@
 #include "font_manager.h"
 #include <stdio.h>
 
-int main(void) {
-    GameConfig config;
-    if (!LoadConfig(CONFIG_PATH, &config)) {
-        printf("Error al cargar configuración.\n");
-        return -1;
-    }
+int main(void)
+{
+    hw_init();
+    Game_Init();
 
-    InitWindow(config.screen.width, config.screen.height, config.title);
-    FontManager_Init(config.font.fontPath, config.font.fontSize);
+    while (!WindowShouldClose())
+        Game_UpdateDraw();
 
-    while (!WindowShouldClose()) {
-        BeginDrawing();
-        ClearBackground(BLACK);
-
-        DrawTextEx(GetGlobalFont(), "Hola Mundo", (Vector2){100,100}, 24, 2, RAYWHITE);
-
-        EndDrawing();
-    }
-
-    FontManager_Unload();
-    CloseAudioDevice();
-    CloseWindow();
-
+    Game_Shutdown();
     return 0;
 }

@@ -1,16 +1,22 @@
 #include "font_manager.h"
 #include <stddef.h>
 
-static Font globalFont; // fuente global estática
+static Font globalFont;
 
-void FontManager_Init(const char *fontPath, int fontSize) {
+// carga fuente global usada por HUD y mensajes
+void FontManager_Init(const char *fontPath, int fontSize) 
+{
     globalFont = LoadFontEx(fontPath, fontSize, NULL, 0);
 }
 
-Font GetGlobalFont(void) {
+// devuelve referencia a la font del juego
+Font GetGlobalFont(void) 
+{
     return globalFont;
 }
 
-void FontManager_Unload(void) {
+// libera recursos
+void FontManager_Unload(void) 
+{
     UnloadFont(globalFont);
 }

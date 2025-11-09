@@ -3,13 +3,13 @@
 
 #include "raylib.h"
 
-// Inicializa la fuente global
+// inicializa fuente global única
 void FontManager_Init(const char *fontPath, int fontSize);
 
-// Obtiene la fuente global
+// retorna la fuente global
 Font GetGlobalFont(void);
 
-// Libera recursos al cerrar
+// libera la fuente cargada
 void FontManager_Unload(void);
 
 #endif
