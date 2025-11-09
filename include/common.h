@@ -3,6 +3,7 @@
 
 #include "raylib.h"
 #include <stdbool.h>
+#include "gameplay/player.h"   // ✅ aquí traemos la definición de Player
 
 // --------------------
 // Constantes del gameplay
@@ -19,6 +20,23 @@
 #define SECOND_WAVE 20
 #define THIRD_WAVE 22
 
+// tiempos y valores varios de gameplay
+#define MAX_PLAY_TIME_SEC            180.0f
+#define PLAYER_INVULNERABLE_TIME     2.0f
+#define WAVE_ALPHA_SPEED             0.02f
+#define TEXT_BIG_SIZE                40
+#define TEXT_SMALL_SIZE              20
+#define FINAL_SCORE_TIME_MULTIPLIER  5.0f
+
+
+// --------------------
+// INPUT ABSTRACCION (no raylib directo dentro de game)
+// --------------------
+#define BUTTON_SHOOT   0
+#define BUTTON_START   1
+#define BUTTON_PAUSE   2
+
+
 // wave actual (balas y AI pueden cambiar por esto)
 typedef enum { FIRST = 0, SECOND, THIRD } EnemyWave;
 
@@ -26,37 +44,23 @@ typedef enum { FIRST = 0, SECOND, THIRD } EnemyWave;
 // --------------------
 // ENTIDADES (ECS-like)
 // --------------------
-// Nota: estos structs NO tienen lógica. Solo datos.
-// La lógica vive en player.c / enemy.c / shoot.c / gameplay.c
-// Esto permite swap de rendering / physics / balancing sin romper todo.
 
-typedef struct Player {
-    Rectangle rec;           // rect para render (dibujo en pantalla)
-    Rectangle collisionRec;  // rect para colisiones (puede ser distinto al visual)
-    Vector2 speed;
-    Color color;             // color fallback si no hay texture asignada
-    Texture2D texture;       // asset del player (opcional, configurable)
-    bool active;             // si puede actualizarse / renderizarse
-    int lives;               // vidas restantes
-    float invulnerableTime;  // segundos de invulnerabilidad post-hit
-} Player;
-
+// Solo los que no existen en gameplay/headers específicos
 
 typedef struct Enemy {
-    Rectangle rec;           // rect para dibujo
-    Rectangle collisionRec;  // rect para colisiones
+    Rectangle rec;
+    Rectangle collisionRec;
     Vector2 speed;
     bool active;
-    Color color;             // color fallback
-    Texture2D texture;       // texture asignada a este enemy (puede variar según tipo)
+    Color color;
+    Texture2D texture;
 } Enemy;
 
-
 typedef struct Shoot {
-    Rectangle rec;           // rect para dibujo y colisión (típicamente coincide)
+    Rectangle rec;
     Vector2 speed;
     bool active;
-    Color color;             // color / sprite básico. Si luego son assets → se cambia.
+    Color color;
 } Shoot;
 
 #endif

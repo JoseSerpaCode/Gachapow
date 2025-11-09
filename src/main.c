@@ -1,15 +1,18 @@
 #include "config.h"
 #include "font_manager.h"
+#include "game.h"
+#include "hw_api.h"
 #include <stdio.h>
 
 int main(void)
 {
     hw_init();
-    Game_Init();
+    InitGame();
 
     while (!WindowShouldClose())
-        Game_UpdateDraw();
+        UpdateDrawFrame();   // 👈 Nombre correcto de la función
 
-    Game_Shutdown();
+    UnloadGame();             // 👈 También corrige aquí
+
     return 0;
 }
