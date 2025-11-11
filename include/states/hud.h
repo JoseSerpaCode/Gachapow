@@ -1,14 +1,15 @@
-#ifndef HUD_H
-#define HUD_H
+#pragma once
+#include "extern/raylib.h"
 
-// inicializa recursos usados por el HUD (fuente, gráficos, etc)
 void InitHUD(void);
-
-// dibuja UI overlay independiente del gameplay (score, tiempo, vidas)
-// *** NO modifica estado del juego ***
+void UnloadHUD(void);
 void DrawHUD(int score, float elapsedTime, int lives);
 
-// libera recursos reservados por HUD
-void UnloadHUD(void);
+/* setters (ajusta posiciones en px) */
+void HUD_SetScorePos(int x, int y);
+void HUD_SetTimePos(int x, int y);
+void HUD_SetHeartPos(int x, int y);
 
-#endif
+/* controla máximo de vidas (por si cambia) */
+void HUD_SetMaxLives(int maxLives);
+int HUD_GetMaxLives(void);

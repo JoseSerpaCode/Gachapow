@@ -1,30 +1,22 @@
-#ifndef ASSETS_H
-#define ASSETS_H
+#pragma once
+#include "extern/raylib.h"
+#include <stdbool.h>
 
-#include "raylib.h"
-
-// Identificadores de texturas cargadas 1 sola vez al inicio del juego
-// son la API pública para pedir texturas sin repetir rutas en código
 typedef enum {
-    TEX_BG_STARS_CLOSE,
+    TEX_BG_STARS_CLOSE = 0,
     TEX_BG_STARS_FAR,
     TEX_PLAYER,
     TEX_ENEMY,
     TEX_LOGO,
-    TEX_HUD,
-    TEX_COUNT  // MUST be last → tamaño del array interno
+    TEX_HUD_FULLHEART,
+    TEX_HUD_HALFHEART,
+    TEX_HUD_EMPTYHEART,
+    /* ... */
+    TEX_COUNT
 } TextureID;
 
-// carga TODOS los assets estáticos del juego (solo una vez)
 void Assets_Init(void);
-
-// retorna la textura asociada a un asset ID
-// NO duplica recursos, solo referencia
 Texture2D GetTextureAsset(TextureID id);
-
-// libera TODOS los assets cargados por Assets_Init()
+bool Assets_IsLoaded(TextureID id);
+bool Assets_LoadByPath(TextureID id, const char *path);
 void Assets_Unload(void);
-
-void Assets_Init(void);
-
-#endif

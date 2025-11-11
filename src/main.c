@@ -4,6 +4,7 @@
 #include "hud.h"
 #include <direct.h>
 #include <stdio.h>
+#include "assets.h"
 
 // -----------------------------------------------------------------------------
 // Entry point
