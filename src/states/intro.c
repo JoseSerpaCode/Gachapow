@@ -4,10 +4,10 @@
 #include <stdio.h>
 
 #define MAX_FRAMES 2000
-#define FRAME_INTERVAL 0.18f
+#define FRAME_INTERVAL 0.21f
 
-#define FADE_DURATION 1.5f     // Fade in y fade out
-#define HOLD_DURATION 3.0f     // Tiempo pleno del logo
+#define FADE_DURATION 2.0f     // Fade in y fade out
+#define HOLD_DURATION 3.2f     // Tiempo pleno del logo
 
 static Texture2D frames[MAX_FRAMES];
 static int totalFrames = 0;
