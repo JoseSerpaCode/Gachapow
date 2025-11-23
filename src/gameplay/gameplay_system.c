@@ -1,7 +1,7 @@
 // src/game.c
 #include "extern/raylib.h"
 #include "common.h"
-#include "game.h"
+#include "gameplay_system.h"
 #include "player.h"
 #include "enemy.h"
 #include "shoot.h"

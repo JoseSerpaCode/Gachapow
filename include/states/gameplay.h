@@ -1,11 +1,9 @@
-#ifndef GAMEPLAY_STATE_H
-#define GAMEPLAY_STATE_H
+#ifndef STATE_GAMEPLAY_H
+#define STATE_GAMEPLAY_H
 
-// forward API del estado gameplay
-
-void Gameplay_Enter(void);
+void Gameplay_Init(void);
 void Gameplay_Update(void);
 void Gameplay_Draw(void);
-void Gameplay_Exit(void);
+void Gameplay_Unload(void);
 
 #endif
