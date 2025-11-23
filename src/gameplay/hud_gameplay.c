@@ -1,5 +1,5 @@
 // src/states/hud.c
-#include "states/hud.h"
+#include "hud.h"
 #include "assets.h"
 #include "extern/raylib.h"
 #include <stdio.h>
