@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define SCREEN_WIDTH  540
+#define SCREEN_WIDTH 540
 #define SCREEN_HEIGHT 700
 
 /* Constants */
@@ -21,7 +21,8 @@ static const float INVULNERABLE_SEC = 2.0f;
 static const float WAVE_FADE_SPEED = 0.02f; /* unidades de alpha por frame (puedes multiplicar por dt si quieres) */
 
 /* Game-level aggregated state -- evita globals dispersos */
-typedef struct {
+typedef struct
+{
     bool gameOver;
     bool pause;
     bool victory;
@@ -48,11 +49,14 @@ typedef struct {
 static GameState GS;
 
 /* Helpers */
-static void reset_enemies(GameState *g) {
-    for (int i = 0; i < NUM_MAX_ENEMIES; ++i) g->enemies[i].active = false;
+static void reset_enemies(GameState *g)
+{
+    for (int i = 0; i < NUM_MAX_ENEMIES; ++i)
+        g->enemies[i].active = false;
 }
 
-static void start_wave(GameState *g, EnemyWave newWave, int newActiveCount) {
+static void start_wave(GameState *g, EnemyWave newWave, int newActiveCount)
+{
     g->enemiesKill = 0;
     g->wave = newWave;
     g->activeEnemies = newActiveCount;
@@ -63,7 +67,8 @@ static void start_wave(GameState *g, EnemyWave newWave, int newActiveCount) {
 }
 
 /* Init / Unload */
-void InitGame(void) {
+void InitGame(void)
+{
     Assets_Init();
 
     memset(&GS, 0, sizeof(GS));
@@ -92,26 +97,34 @@ void InitGame(void) {
 static void process_input(GameState *g) {
     if (IsKeyPressed(KEY_F1)) g->victory = true;
     if (IsKeyPressed('P')) g->pause = !g->pause;
+
     if ((g->gameOver || g->victory) && IsKeyPressed(KEY_ENTER)) {
         hw_reset_dispense();
         g->rewardDispensed = false;
         g->prizeState = PRIZE_IDLE;
-        InitGame(); /* reinicia todo */
+        InitGame();
     }
 }
 
+
 /* Manage wave fade animation (centraliza lógica para no repetir) */
-static void update_wave_fade(GameState *g, float dt) {
+static void update_wave_fade(GameState *g, float dt)
+{
     (void)dt; /* si quieres usar velocidad dependiente de tiempo, multiplícalo aquí */
-    if (!g->smooth) {
+    if (!g->smooth)
+    {
         g->alpha += WAVE_FADE_SPEED;
-        if (g->alpha >= 1.0f) {
+        if (g->alpha >= 1.0f)
+        {
             g->alpha = 1.0f;
             g->smooth = true;
         }
-    } else {
+    }
+    else
+    {
         g->alpha -= WAVE_FADE_SPEED;
-        if (g->alpha <= 0.0f) {
+        if (g->alpha <= 0.0f)
+        {
             g->alpha = 0.0f;
             /* Podrías decidir si smooth vuelve a false o no; así se hace un único ciclo */
         }
@@ -124,20 +137,23 @@ void UpdateGame(void)
     /* Actualizamos el fondo en cada frame (esto mueve bgScroll1/bgScroll2) */
     UpdateBackground();
 
-    process_input(&GS);  /* tu función de entrada separada (si no la tienes, mantén la lógica de teclas aquí) */
+    process_input(&GS); /* tu función de entrada separada (si no la tienes, mantén la lógica de teclas aquí) */
 
-    if (GS.gameOver || GS.victory) {
+    if (GS.gameOver || GS.victory)
+    {
         /* Si se terminó, no actualizar más lógica de juego */
         return;
     }
 
-    if (GS.pause) return;
+    if (GS.pause)
+        return;
 
     float dt = GetFrameTime();
     GS.elapsedTime += dt;
 
     /* Tiempo límite */
-    if (GS.elapsedTime >= MAX_GAME_TIME) {
+    if (GS.elapsedTime >= MAX_GAME_TIME)
+    {
         GS.gameOver = true;
         return;
     }
@@ -149,12 +165,16 @@ void UpdateGame(void)
                  &GS.enemiesKill, &GS.score, &GS.shootRate, GS.player.rec);
 
     /* Colisiones jugador vs enemigos */
-    for (int i = 0; i < GS.activeEnemies; ++i) {
-        if (GS.enemies[i].active && CheckCollisionRecs(GS.player.collisionRec, GS.enemies[i].collisionRec)) {
-            if (GS.player.invulnerableTime <= 0.0f) {
+    for (int i = 0; i < GS.activeEnemies; ++i)
+    {
+        if (GS.enemies[i].active && CheckCollisionRecs(GS.player.collisionRec, GS.enemies[i].collisionRec))
+        {
+            if (GS.player.invulnerableTime <= 0.0f)
+            {
                 GS.player.lives--;
                 GS.player.invulnerableTime = INVULNERABLE_SEC;
-                if (GS.player.lives <= 0) {
+                if (GS.player.lives <= 0)
+                {
                     GS.gameOver = true;
                     return;
                 }
@@ -164,38 +184,44 @@ void UpdateGame(void)
     }
 
     /* Control de oleadas */
-    switch (GS.wave) {
-        case FIRST:
-            update_wave_fade(&GS, dt);
-            if (GS.enemiesKill >= GS.activeEnemies) {
-                start_wave(&GS, SECOND, SECOND_WAVE);
-            }
-            break;
-        case SECOND:
-            update_wave_fade(&GS, dt);
-            if (GS.enemiesKill >= GS.activeEnemies) {
-                start_wave(&GS, THIRD, THIRD_WAVE);
-            }
-            break;
-        case THIRD:
-            update_wave_fade(&GS, dt);
-            if (GS.enemiesKill >= GS.activeEnemies) {
-                GS.victory = true;
-            }
-            break;
-        default:
-            break;
+    switch (GS.wave)
+    {
+    case FIRST:
+        update_wave_fade(&GS, dt);
+        if (GS.enemiesKill >= GS.activeEnemies)
+        {
+            start_wave(&GS, SECOND, SECOND_WAVE);
+        }
+        break;
+    case SECOND:
+        update_wave_fade(&GS, dt);
+        if (GS.enemiesKill >= GS.activeEnemies)
+        {
+            start_wave(&GS, THIRD, THIRD_WAVE);
+        }
+        break;
+    case THIRD:
+        update_wave_fade(&GS, dt);
+        if (GS.enemiesKill >= GS.activeEnemies)
+        {
+            GS.victory = true;
+        }
+        break;
+    default:
+        break;
     }
 }
 
 /* Draw */
-void DrawGame(void) {
+void DrawGame(void)
+{
     BeginDrawing();
     ClearBackground(RAYWHITE);
 
     DrawBackground();
 
-    if (!GS.gameOver) {
+    if (!GS.gameOver)
+    {
         DrawPlayer(&GS.player);
         DrawEnemies(GS.enemies, GS.activeEnemies, true);
 
@@ -204,15 +230,18 @@ void DrawGame(void) {
                 DrawRectangleRec(GS.shoots[i].rec, GS.shoots[i].color);
 
         /* Texto de waves (usa alpha actual) */
-        const char *wave_text = (GS.wave == FIRST) ? "FIRST WAVE" :
-                                (GS.wave == SECOND) ? "SECOND WAVE" : "THIRD WAVE";
+        const char *wave_text = (GS.wave == FIRST) ? "FIRST WAVE" : (GS.wave == SECOND) ? "SECOND WAVE"
+                                                                                        : "THIRD WAVE";
         DrawText(wave_text, SCREEN_WIDTH / 2 - MeasureText(wave_text, 40) / 2, SCREEN_HEIGHT / 2 - 40, 40, Fade(BLACK, GS.alpha));
 
         /* Victory / Pause overlays dibujados aquí (si aplica) */
-        if (GS.victory) {
-            if (!GS.rewardDispensed) {
+        if (GS.victory)
+        {
+            if (!GS.rewardDispensed)
+            {
                 GS.prizeState = hw_dispense_request();
-                if (GS.prizeState == PRIZE_DONE) GS.rewardDispensed = true;
+                if (GS.prizeState == PRIZE_DONE)
+                    GS.rewardDispensed = true;
             }
 
             DrawText("YOU WIN!", SCREEN_WIDTH / 2 - MeasureText("YOU WIN!", 40) / 2, SCREEN_HEIGHT / 2 - 40, 40, BLACK);
@@ -222,10 +251,13 @@ void DrawGame(void) {
             else
                 DrawText("REWARD DISPENSED!", SCREEN_WIDTH / 2 - MeasureText("REWARD DISPENSED!", 20) / 2, SCREEN_HEIGHT / 2 + 20, 20, DARKGREEN);
         }
-        else if (GS.pause) {
+        else if (GS.pause)
+        {
             DrawText("GAME PAUSED", SCREEN_WIDTH / 2 - MeasureText("GAME PAUSED", 40) / 2, SCREEN_HEIGHT / 2 - 40, 40, GRAY);
         }
-    } else {
+    }
+    else
+    {
         int finalScore = GS.score + (int)(GS.elapsedTime * 5.0f);
         char buf[64];
         snprintf(buf, sizeof(buf), "FINAL SCORE: %i", finalScore);
@@ -241,13 +273,15 @@ void DrawGame(void) {
 }
 
 /* Unload */
-void UnloadGame(void) {
+void UnloadGame(void)
+{
     UnloadBackground();
     Assets_Unload(); /* si existe */
 }
 
 /* Single-step for game loop */
-void UpdateDrawFrame(void) {
+void UpdateDrawFrame(void)
+{
     UpdateGame();
     DrawGame();
 }
