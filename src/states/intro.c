@@ -1,6 +1,7 @@
 #include "states/intro.h"
 #include "core/state_manager.h"
 #include "raylib.h"
+#include "assets.h"
 #include <stdio.h>
 
 #define MAX_FRAMES 2000
@@ -35,8 +36,12 @@ void Intro_Init()
     }
 
     // ---- Logos ----
-    logo1 = LoadTexture("assets/images/logo.png");
+    logo1 = GetTextureAsset(TEX_LOGO_GACHAPOW);
     logo2 = LoadTexture("assets/images/player.png");
+
+    // Activar filtrado POINT si usas pixel art
+    SetTextureFilter(logo1, TEXTURE_FILTER_POINT);
+    SetTextureFilter(logo2, TEXTURE_FILTER_POINT);
 
     step = 0;
     timer = 0;
@@ -148,17 +153,28 @@ void Intro_Draw()
             alpha = 1.0f - (t / FADE_DURATION); // Fade-out
         }
 
-        // Centrado del logo
         int screenW = GetScreenWidth();
         int screenH = GetScreenHeight();
 
-        float posX = (screenW - tex.width) * 0.5f;
-        float posY = (screenH - tex.height) * 0.5f;
+        // --- ESCALA PROPORCIONAL PARA LLENAR PANTALLA ---
+        float scaleX = (float)screenW / tex.width;
+        float scaleY = (float)screenH / tex.height;
+        float scale = (scaleX < scaleY) ? scaleX : scaleY;
+
+        float dstW = tex.width * scale;
+        float dstH = tex.height * scale;
+
+        float posX = (screenW - dstW) * 0.5f;
+        float posY = (screenH - dstH) * 0.5f;
+
+        Rectangle src = {0, 0, tex.width, tex.height};
+        Rectangle dst = {posX, posY, dstW, dstH};
+        Vector2 origin = {0, 0};
 
         Color tint = WHITE;
         tint.a = (unsigned char)(alpha * 255);
 
-        DrawTexture(tex, posX, posY, tint);
+        DrawTexturePro(tex, src, dst, origin, 0.0f, tint);
     }
     break;
     }

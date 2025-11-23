@@ -11,8 +11,8 @@ typedef enum {
     TEX_HUD_FULLHEART,
     TEX_HUD_HALFHEART,
     TEX_HUD_EMPTYHEART,
+    TEX_LOGO_GACHAPOW,
     TEX_COUNT,
-    
 } TextureID;
 
 void Assets_Init(void);

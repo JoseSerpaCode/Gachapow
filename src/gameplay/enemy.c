@@ -38,13 +38,13 @@ void InitEnemies(Enemy enemy[], int count, EnemyWave wave)
         enemy[i].collisionRec.height = enemy[i].rec.height - 6;
 
         // Velocidades verticales según la oleada
-        if (wave == FIRST)  enemy[i].speed.y = (float)GetRandomValue(2, 4);
+        if (wave == FIRST)  enemy[i].speed.y = (float)GetRandomValue(3, 4);
         else if (wave == SECOND) enemy[i].speed.y = (float)GetRandomValue(4, 7);
         else enemy[i].speed.y = (float)GetRandomValue(7, 10);
 
         // Velocidad horizontal ocasional
         if (GetRandomValue(0, 100) < 40)
-            enemy[i].speed.x = (float)GetRandomValue(-3, 3);
+            enemy[i].speed.x = (float)GetRandomValue(-4, 4);
         else
             enemy[i].speed.x = 0.0f;
     }

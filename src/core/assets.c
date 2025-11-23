@@ -17,6 +17,7 @@ static const char *asset_paths[TEX_COUNT] = {
     [TEX_HUD_FULLHEART]  = "assets/images/hud/hud.png",
     [TEX_HUD_HALFHEART]  = "assets/images/hud/hud.png",
     [TEX_HUD_EMPTYHEART] = "assets/images/hud/hud.png",
+    [TEX_LOGO_GACHAPOW]  = "assets/images/logo.png",
 };
 
 /* Helper: carga una textura y la almacena en el banco */
