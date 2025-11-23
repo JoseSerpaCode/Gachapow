@@ -4,12 +4,33 @@
 #include <string.h>
 #include <stdlib.h>
 
-// lee config JSON y carga parámetros globales (resolución, audio, fuente, título)
-bool LoadConfig(const char *filename, GameConfig *config) 
+#define SAFE_STRCPY(dest, src) strncpy(dest, src, sizeof(dest)-1)
+
+bool LoadConfig(const char *filename, GameConfig *config)
 {
+    // Valores por defecto (si no existe el JSON, la app sigue funcionando)
+    config->screen.width = 1280;
+    config->screen.height = 720;
+    config->screen.fullscreen = false;
+    config->screen.fps = 60;
+
+    config->audio.master_volume = 1.0f;
+    config->audio.music_volume = 1.0f;
+    config->audio.sfx_volume = 1.0f;
+
+    config->intro.enabled = true;
+    SAFE_STRCPY(config->intro.musicPath, "assets/music/intro.ogg");
+
+    SAFE_STRCPY(config->font.fontPath, "assets/fonts/default.ttf");
+    config->font.fontSize = 24;
+
+    SAFE_STRCPY(config->title, "Gachapow");
+
+    // ----------------------------
+
     FILE *file = fopen(filename, "r");
     if (!file) {
-        printf("⚠️ No se pudo abrir config: %s\n", filename);
+        printf("⚠️ No se encontró config, usando valores por defecto.\n");
         return false;
     }
 
@@ -18,7 +39,10 @@ bool LoadConfig(const char *filename, GameConfig *config)
     rewind(file);
 
     char *data = malloc(size + 1);
-    if (!data) { fclose(file); return false; }
+    if (!data) {
+        fclose(file);
+        return false;
+    }
 
     fread(data, 1, size, file);
     data[size] = '\0';
@@ -26,42 +50,67 @@ bool LoadConfig(const char *filename, GameConfig *config)
 
     cJSON *json = cJSON_Parse(data);
     if (!json) {
-        printf("⚠️ Error JSON config: %s\n", cJSON_GetErrorPtr());
+        printf("⚠️ Error parseando JSON: %s\n", cJSON_GetErrorPtr());
         free(data);
         return false;
     }
 
-    // --- pantalla ---
-    cJSON *screen = cJSON_GetObjectItem(json, "screen");
-    if (screen) {
-        config->screen.width      = cJSON_GetObjectItem(screen, "width")       ? cJSON_GetObjectItem(screen, "width")->valueint : 800;
-        config->screen.height     = cJSON_GetObjectItem(screen, "height")      ? cJSON_GetObjectItem(screen, "height")->valueint : 600;
-        config->screen.fullscreen = cJSON_GetObjectItem(screen, "fullscreen")  ? cJSON_GetObjectItem(screen, "fullscreen")->valueint : false;
-        config->screen.fps        = cJSON_GetObjectItem(screen, "fps")         ? cJSON_GetObjectItem(screen, "fps")->valueint : 60;
+    // ========== SCREEN ==========
+    cJSON *screen = cJSON_GetObjectItemCaseSensitive(json, "screen");
+    if (cJSON_IsObject(screen)) {
+        cJSON *w = cJSON_GetObjectItem(screen, "width");
+        cJSON *h = cJSON_GetObjectItem(screen, "height");
+        cJSON *fs = cJSON_GetObjectItem(screen, "fullscreen");
+        cJSON *fps = cJSON_GetObjectItem(screen, "fps");
+
+        if (cJSON_IsNumber(w)) config->screen.width = w->valueint;
+        if (cJSON_IsNumber(h)) config->screen.height = h->valueint;
+        if (cJSON_IsBool(fs)) config->screen.fullscreen = fs->valueint;
+        if (cJSON_IsNumber(fps)) config->screen.fps = fps->valueint;
     }
 
-    // --- audio ---
-    cJSON *audio = cJSON_GetObjectItem(json, "audio");
-    config->audio.master_volume = (audio && cJSON_GetObjectItem(audio, "master_volume")) ?
-                                  (float)cJSON_GetObjectItem(audio, "master_volume")->valuedouble : 1.0f;
+    // ========== AUDIO ==========
+    cJSON *audio = cJSON_GetObjectItemCaseSensitive(json, "audio");
+    if (cJSON_IsObject(audio)) {
+        cJSON *mv = cJSON_GetObjectItem(audio, "master_volume");
+        cJSON *mus = cJSON_GetObjectItem(audio, "music_volume");
+        cJSON *sfx = cJSON_GetObjectItem(audio, "sfx_volume");
 
-    // --- fuente ---
-    cJSON *font = cJSON_GetObjectItem(json, "font");
-    if (font) {
+        if (cJSON_IsNumber(mv)) config->audio.master_volume = mv->valuedouble;
+        if (cJSON_IsNumber(mus)) config->audio.music_volume = mus->valuedouble;
+        if (cJSON_IsNumber(sfx)) config->audio.sfx_volume = sfx->valuedouble;
+    }
+
+    // ========== INTRO ==========
+    cJSON *intro = cJSON_GetObjectItemCaseSensitive(json, "intro");
+    if (cJSON_IsObject(intro)) {
+        cJSON *en = cJSON_GetObjectItem(intro, "enabled");
+        cJSON *mus = cJSON_GetObjectItem(intro, "music");
+
+        if (cJSON_IsBool(en)) config->intro.enabled = en->valueint;
+        if (cJSON_IsString(mus)) SAFE_STRCPY(config->intro.musicPath, mus->valuestring);
+    }
+
+    // ========== FONT ==========
+    cJSON *font = cJSON_GetObjectItemCaseSensitive(json, "font");
+    if (cJSON_IsObject(font)) {
         cJSON *path = cJSON_GetObjectItem(font, "path");
         cJSON *size = cJSON_GetObjectItem(font, "size");
 
-        strcpy(config->font.fontPath, path ? path->valuestring : "assets/fonts/default.ttf");
-        config->font.fontSize = size ? size->valueint : 20;
+        if (cJSON_IsString(path)) SAFE_STRCPY(config->font.fontPath, path->valuestring);
+        if (cJSON_IsNumber(size)) config->font.fontSize = size->valueint;
     }
 
-    // --- título ventana ---
-    cJSON *title = cJSON_GetObjectItem(json, "title");
-    strcpy(config->title, title ? title->valuestring : "Untitled Game");
+    // ========== WINDOW TITLE ==========
+    cJSON *title = cJSON_GetObjectItemCaseSensitive(json, "window_title");
+    if (cJSON_IsString(title))
+        SAFE_STRCPY(config->title, title->valuestring);
+
+    // ----------------------------
 
     cJSON_Delete(json);
     free(data);
 
-    printf("✅ Config cargurada desde: %s\n", filename);
+    printf("✅ Config cargada desde %s\n", filename);
     return true;
 }

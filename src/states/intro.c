@@ -20,8 +20,16 @@ static int step = 0; // 0=video, 1=logo1, 2=logo2, 3=fin
 static float timer = 0;
 static int currentFrame = 0;
 
+// ---- MUSICA ----
+static Music introMusic;
+
 void Intro_Init()
 {
+    // ---- Cargar Música del Intro ----
+    introMusic = LoadMusicStream("assets/audio/game_music.ogg");
+    PlayMusicStream(introMusic);
+    SetMusicVolume(introMusic, 1.0f);
+
     // ---- STEP 0: cargar frames del video ----
     for (int i = 0; i < MAX_FRAMES; i++)
     {
@@ -39,7 +47,6 @@ void Intro_Init()
     logo1 = GetTextureAsset(TEX_LOGO_GACHAPOW);
     logo2 = LoadTexture("assets/images/player.png");
 
-    // Activar filtrado POINT si usas pixel art
     SetTextureFilter(logo1, TEXTURE_FILTER_POINT);
     SetTextureFilter(logo2, TEXTURE_FILTER_POINT);
 
@@ -59,6 +66,8 @@ void Intro_Init()
 
 void Intro_Update()
 {
+    UpdateMusicStream(introMusic);
+
     float dt = GetFrameTime();
 
     switch (step)
@@ -85,6 +94,21 @@ void Intro_Update()
 
         float totalTime = FADE_DURATION + HOLD_DURATION + FADE_DURATION;
 
+        // ---------- FADE-OUT DE MÚSICA DURANTE EL ÚLTIMO LOGO ----------
+        if (step == 2)
+        {
+            float fadeStart = FADE_DURATION + HOLD_DURATION;  // momento exacto donde empieza a desvanecerse
+            if (timer > fadeStart)
+            {
+                float t = timer - fadeStart;       // tiempo dentro del fade-out
+                float alpha = 1.0f - (t / FADE_DURATION);
+
+                if (alpha < 0.0f) alpha = 0.0f;
+
+                SetMusicVolume(introMusic, alpha);
+            }
+        }
+
         if (timer >= totalTime)
         {
             step++;
@@ -94,6 +118,8 @@ void Intro_Update()
     break;
 
     case 3:
+        StopMusicStream(introMusic);
+        SetMusicVolume(introMusic, 1.0f); // reset para la próxima vez
         StateManager_Change(STATE_GAMEPLAY);
         break;
     }
@@ -113,7 +139,6 @@ void Intro_Draw()
         int screenW = GetScreenWidth();
         int screenH = GetScreenHeight();
 
-        // Escala proporcional
         float scaleX = (float)screenW / tex.width;
         float scaleY = (float)screenH / tex.height;
         float scale = (scaleX < scaleY) ? scaleX : scaleY;
@@ -156,7 +181,6 @@ void Intro_Draw()
         int screenW = GetScreenWidth();
         int screenH = GetScreenHeight();
 
-        // --- ESCALA PROPORCIONAL PARA LLENAR PANTALLA ---
         float scaleX = (float)screenW / tex.width;
         float scaleY = (float)screenH / tex.height;
         float scale = (scaleX < scaleY) ? scaleX : scaleY;
@@ -189,4 +213,6 @@ void Intro_Unload()
 
     UnloadTexture(logo1);
     UnloadTexture(logo2);
+
+    UnloadMusicStream(introMusic);
 }
