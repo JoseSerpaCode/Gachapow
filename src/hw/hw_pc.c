@@ -23,7 +23,43 @@ void hw_init(void)
     if (!LoadConfig(CONFIG_PATH, &config))
         printf("⚠️ Config falló, se usarán valores default internos.\n");
 
+    // ------------------------------------------------------------
+    // 📌 1. Forzar relación de aspecto 16:9 y fullscreen real
+    // ------------------------------------------------------------
+    int display = GetCurrentMonitor();
+    int monitorW = GetMonitorWidth(display);
+    int monitorH = GetMonitorHeight(display);
+
+    float aspect = 16.0f / 9.0f;
+
+    int targetW = monitorW;
+    int targetH = (int)(monitorW / aspect);
+
+    // si la altura excede, usamos altura y recalculamos ancho
+    if (targetH > monitorH) {
+        targetH = monitorH;
+        targetW = (int)(monitorH * aspect);
+    }
+
+    config.screen.width = targetW;
+    config.screen.height = targetH;
+    config.screen.fullscreen = true;
+
+    // ------------------------------------------------------------
+    // 📌 2. Flags ANTES de InitWindow()
+    // ------------------------------------------------------------
+    SetConfigFlags(FLAG_FULLSCREEN_MODE);
+    // opcional: ventana sin bordes
+    // SetConfigFlags(FLAG_WINDOW_UNDECORATED);
+
+    // ------------------------------------------------------------
+    // 📌 3. Crear ventana en fullscreen escalada a 16:9
+    // ------------------------------------------------------------
     InitWindow(config.screen.width, config.screen.height, config.title);
+
+    // ------------------------------------------------------------
+    // 📌 4. Audio, fuentes, assets
+    // ------------------------------------------------------------
     InitAudioDevice();
     SetMasterVolume(config.audio.master_volume);
     SetTargetFPS(config.screen.fps);
@@ -33,6 +69,7 @@ void hw_init(void)
 
     startTime = GetTime();
 }
+
 
 // exposición de config global para gameplay / states
 const GameConfig *hw_get_config(void)
