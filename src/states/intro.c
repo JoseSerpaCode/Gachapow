@@ -3,34 +3,93 @@
 #include "raylib.h"
 #include "assets.h"
 #include <stdio.h>
+#include "config.h"
 
 #define MAX_FRAMES 2000
 #define FRAME_INTERVAL 0.21f
 
-#define FADE_DURATION 2.0f     // Fade in y fade out
-#define HOLD_DURATION 3.2f     // Tiempo pleno del logo
+#define FADE_DURATION 2.0f
+#define HOLD_DURATION 3.2f
 
+// ============================================================================
+// VARIABLES GLOBALES
+// ============================================================================
+
+extern GameConfig config;
+
+// Frames del video
 static Texture2D frames[MAX_FRAMES];
 static int totalFrames = 0;
 
+// Logo principal
 static Texture2D logo1;
-static Texture2D logo2;
 
-static int step = 0; // 0=video, 1=logo1, 2=logo2, 3=fin
+// Estado general del intro
+// 0 = video
+// 1 = logo
+// 2 = texto legal
+// 3 = fin
+static int step = 0;
+
 static float timer = 0;
 static int currentFrame = 0;
 
-// ---- MUSICA ----
+// Texto legal multilínea
+static const char *legalText =
+    "Este juego utiliza el lenguaje C junto a la libreria Raylib.\n"
+    "El sistema es desarrollado por el equipo 'GP Environment'.\n"
+    "Todos los derechos reservados.\n\n"
+    "Los personajes, historias, nombres y eventos representados en este juego\n"
+    "son ficticios. Cualquier similitud con personas reales es coincidencia.\n\n"
+    "El software está protegido por leyes internacionales de derechos de autor.\n"
+    "La reproducción total o parcial sin autorización está prohibida.\n\n"
+    "© 2026 Gachapow. Todos los derechos reservados.";
+
+// Música del intro
 static Music introMusic;
 
+// ============================================================================
+// MEDIR TEXTO MULTILÍNEA
+// ============================================================================
+int MeasureMultilineText(const char *text, int fontSize)
+{
+    int maxWidth = 0;
+    int width = 0;
+
+    for (int i = 0; text[i] != '\0'; i++)
+    {
+        if (text[i] == '\n')
+        {
+            if (width > maxWidth)
+                maxWidth = width;
+            width = 0;
+        }
+        else
+        {
+            width += MeasureText("A", fontSize);
+        }
+    }
+
+    if (width > maxWidth)
+        maxWidth = width;
+    return maxWidth;
+}
+
+// ============================================================================
+// INIT
+// ============================================================================
 void Intro_Init()
 {
-    // ---- Cargar Música del Intro ----
+    // Cargar música del intro
     introMusic = LoadMusicStream("assets/audio/game_music.ogg");
-    PlayMusicStream(introMusic);
-    SetMusicVolume(introMusic, 1.0f);
 
-    // ---- STEP 0: cargar frames del video ----
+    // Usar volumen desde config
+    float baseVol = config.audio.music_volume;
+    SetMusicVolume(introMusic, baseVol);
+
+    PlayMusicStream(introMusic);
+
+    // Cargar frames del video
     for (int i = 0; i < MAX_FRAMES; i++)
     {
         char name[64];
@@ -43,18 +102,16 @@ void Intro_Init()
         frames[totalFrames++] = t;
     }
 
-    // ---- Logos ----
+    // Cargar logo
     logo1 = GetTextureAsset(TEX_LOGO_GACHAPOW);
-    logo2 = LoadTexture("assets/images/player.png");
-
     SetTextureFilter(logo1, TEXTURE_FILTER_POINT);
-    SetTextureFilter(logo2, TEXTURE_FILTER_POINT);
 
+    // Reset de variables
     step = 0;
     timer = 0;
     currentFrame = 0;
 
-    // Espera inicial en negro
+    // Pantalla negra inicial
     double waitStart = GetTime();
     while (GetTime() - waitStart < 1.5)
     {
@@ -64,16 +121,21 @@ void Intro_Init()
     }
 }
 
+// ============================================================================
+// UPDATE
+// ============================================================================
 void Intro_Update()
 {
     UpdateMusicStream(introMusic);
-
     float dt = GetFrameTime();
 
     switch (step)
     {
-    case 0: // Video
+    // --------------------------------------------------------------------
+    case 0: // Video frame por frame
+            // --------------------------------------------------------------------
         timer += dt;
+
         if (timer >= FRAME_INTERVAL)
         {
             timer -= FRAME_INTERVAL;
@@ -87,132 +149,181 @@ void Intro_Update()
         }
         break;
 
-    case 1: // Logo 1 animación completa
-    case 2: // Logo 2 animación completa
-    {
-        timer += dt;
-
-        float totalTime = FADE_DURATION + HOLD_DURATION + FADE_DURATION;
-
-        // ---------- FADE-OUT DE MÚSICA DURANTE EL ÚLTIMO LOGO ----------
-        if (step == 2)
+    // --------------------------------------------------------------------
+    case 1: // Logo
+    case 2: // Texto legal
+        // --------------------------------------------------------------------
         {
-            float fadeStart = FADE_DURATION + HOLD_DURATION;  // momento exacto donde empieza a desvanecerse
-            if (timer > fadeStart)
+            timer += dt;
+            float totalTime = FADE_DURATION + HOLD_DURATION + FADE_DURATION;
+
+            // Fade out de música en el último paso
+            if (step == 2)
             {
-                float t = timer - fadeStart;       // tiempo dentro del fade-out
-                float alpha = 1.0f - (t / FADE_DURATION);
+                float fadeStart = FADE_DURATION + HOLD_DURATION;
+                if (timer > fadeStart)
+                {
+                    float t = timer - fadeStart;
+                    float alpha = 1.0f - (t / FADE_DURATION);
+                    if (alpha < 0)
+                        alpha = 0;
+                    float baseVol = config.audio.music_volume;
+                    SetMusicVolume(introMusic, alpha * baseVol);
+                }
+            }
 
-                if (alpha < 0.0f) alpha = 0.0f;
-
-                SetMusicVolume(introMusic, alpha);
+            if (timer >= totalTime)
+            {
+                step++;
+                timer = 0;
             }
         }
+        break;
 
-        if (timer >= totalTime)
-        {
-            step++;
-            timer = 0;
-        }
-    }
-    break;
-
+    // --------------------------------------------------------------------
     case 3:
         StopMusicStream(introMusic);
-        SetMusicVolume(introMusic, 1.0f); // reset para la próxima vez
+        SetMusicVolume(introMusic, 1.0f);
         StateManager_Change(STATE_GAMEPLAY);
         break;
     }
 }
 
+// ============================================================================
+// DRAW
+// ============================================================================
 void Intro_Draw()
 {
     BeginDrawing();
     ClearBackground(BLACK);
 
+    int screenW = GetScreenWidth();
+    int screenH = GetScreenHeight();
+
     switch (step)
     {
-    case 0: // Video centrado
-    {
-        Texture2D tex = frames[currentFrame];
-
-        int screenW = GetScreenWidth();
-        int screenH = GetScreenHeight();
-
-        float scaleX = (float)screenW / tex.width;
-        float scaleY = (float)screenH / tex.height;
-        float scale = (scaleX < scaleY) ? scaleX : scaleY;
-
-        float dstW = tex.width * scale;
-        float dstH = tex.height * scale;
-
-        float posX = (screenW - dstW) * 0.5f;
-        float posY = (screenH - dstH) * 0.5f;
-
-        Rectangle src = {0, 0, tex.width, tex.height};
-        Rectangle dst = {posX, posY, dstW, dstH};
-        Vector2 origin = {0, 0};
-
-        DrawTexturePro(tex, src, dst, origin, 0.0f, WHITE);
-    }
-    break;
-
-    case 1:
-    case 2:
-    {
-        Texture2D tex = (step == 1) ? logo1 : logo2;
-
-        float alpha = 1.0f;
-
-        if (timer < FADE_DURATION)
+    // --------------------------------------------------------------------
+    case 0: // VIDEO
+        // --------------------------------------------------------------------
         {
-            alpha = timer / FADE_DURATION; // Fade-in
+            Texture2D tex = frames[currentFrame];
+
+            float scaleX = (float)screenW / tex.width;
+            float scaleY = (float)screenH / tex.height;
+            float scale = (scaleX < scaleY) ? scaleX : scaleY;
+
+            Rectangle dst = {
+                (screenW - tex.width * scale) * 0.5f,
+                (screenH - tex.height * scale) * 0.5f,
+                tex.width * scale,
+                tex.height * scale};
+
+            DrawTexturePro(tex,
+                           (Rectangle){0, 0, tex.width, tex.height},
+                           dst,
+                           (Vector2){0, 0},
+                           0.0f,
+                           WHITE);
         }
-        else if (timer < FADE_DURATION + HOLD_DURATION)
+        break;
+
+    // --------------------------------------------------------------------
+    case 1: // LOGO
+        // --------------------------------------------------------------------
         {
-            alpha = 1.0f; // Pleno
+            Texture2D tex = logo1;
+
+            float alpha;
+            if (timer < FADE_DURATION)
+                alpha = timer / FADE_DURATION;
+            else if (timer < FADE_DURATION + HOLD_DURATION)
+                alpha = 1.0f;
+            else
+                alpha = 1.0f - ((timer - (FADE_DURATION + HOLD_DURATION)) / FADE_DURATION);
+
+            float scaleX = (float)screenW / tex.width;
+            float scaleY = (float)screenH / tex.height;
+            float scale = (scaleX < scaleY) ? scaleX : scaleY;
+
+            Rectangle dst = {
+                (screenW - tex.width * scale) * 0.5f,
+                (screenH - tex.height * scale) * 0.5f,
+                tex.width * scale,
+                tex.height * scale};
+
+            Color tint = WHITE;
+            tint.a = (unsigned char)(alpha * 255);
+
+            DrawTexturePro(tex,
+                           (Rectangle){0, 0, tex.width, tex.height},
+                           dst,
+                           (Vector2){0, 0},
+                           0.0f,
+                           tint);
         }
-        else
+        break;
+
+    // --------------------------------------------------------------------
+    case 2: // TEXTO LEGAL
+        // --------------------------------------------------------------------
         {
-            float t = timer - (FADE_DURATION + HOLD_DURATION);
-            alpha = 1.0f - (t / FADE_DURATION); // Fade-out
+            float alpha;
+            if (timer < FADE_DURATION)
+                alpha = timer / FADE_DURATION;
+            else if (timer < FADE_DURATION + HOLD_DURATION)
+                alpha = 1.0f;
+            else
+                alpha = 1.0f - ((timer - (FADE_DURATION + HOLD_DURATION)) / FADE_DURATION);
+
+            Color tint = WHITE;
+            tint.a = (unsigned char)(alpha * 255);
+
+            int fontSize = 20;
+            int spacing = 5;
+
+            int textW = MeasureMultilineText(legalText, fontSize);
+            int posX = (screenW - textW) / 2;
+            int posY = screenH * 0.15f;
+
+            char line[512];
+            int idx = 0;
+            int y = posY;
+
+            const char *p = legalText;
+
+            while (*p)
+            {
+                if (*p == '\n')
+                {
+                    line[idx] = '\0';
+                    DrawText(line, posX, y, fontSize, tint);
+                    y += fontSize + spacing;
+                    idx = 0;
+                }
+                else
+                {
+                    line[idx++] = *p;
+                }
+                p++;
+            }
+
+            line[idx] = '\0';
+            DrawText(line, posX, y, fontSize, tint);
         }
-
-        int screenW = GetScreenWidth();
-        int screenH = GetScreenHeight();
-
-        float scaleX = (float)screenW / tex.width;
-        float scaleY = (float)screenH / tex.height;
-        float scale = (scaleX < scaleY) ? scaleX : scaleY;
-
-        float dstW = tex.width * scale;
-        float dstH = tex.height * scale;
-
-        float posX = (screenW - dstW) * 0.5f;
-        float posY = (screenH - dstH) * 0.5f;
-
-        Rectangle src = {0, 0, tex.width, tex.height};
-        Rectangle dst = {posX, posY, dstW, dstH};
-        Vector2 origin = {0, 0};
-
-        Color tint = WHITE;
-        tint.a = (unsigned char)(alpha * 255);
-
-        DrawTexturePro(tex, src, dst, origin, 0.0f, tint);
-    }
-    break;
+        break;
     }
 
     EndDrawing();
 }
 
+// ============================================================================
+// UNLOAD
+// ============================================================================
 void Intro_Unload()
 {
     for (int i = 0; i < totalFrames; i++)
         UnloadTexture(frames[i]);
 
     UnloadTexture(logo1);
-    UnloadTexture(logo2);
-
     UnloadMusicStream(introMusic);
 }

@@ -47,4 +47,7 @@ typedef struct {
 
 bool LoadConfig(const char *filename, GameConfig *config);
 
+// Variable global accesible desde cualquier archivo
+extern GameConfig config;
+
 #endif

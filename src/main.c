@@ -8,6 +8,7 @@
 
 int main(void)
 {
+    
     // Comprobamos si el archivo de config existe
     FILE *file = fopen("assets/data/config.json", "r");
     if (!file) {

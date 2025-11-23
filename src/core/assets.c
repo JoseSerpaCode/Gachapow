@@ -40,16 +40,13 @@ static bool Assets_LoadTextureInternal(TextureID id, const char *path)
 }
 
 /* Inicializa el sistema de assets.
-   Si prefieres carga eager, descomenta el bucle para precargar todo.
 */
 void Assets_Init(void)
 {
     memset(textures, 0, sizeof(textures));
-    /* Si quieres precargar todo en el init, descomenta:
     for (int i = 0; i < TEX_COUNT; ++i) {
         if (asset_paths[i]) Assets_LoadTextureInternal((TextureID)i, asset_paths[i]);
     }
-    */
 }
 
 /* Retorna una copia de Texture2D (como antes).

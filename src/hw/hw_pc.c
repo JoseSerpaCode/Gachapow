@@ -6,7 +6,7 @@
 #include <stdio.h>
 
 // config cargada desde JSON (persistente durante todo el runtime)
-static GameConfig config;
+extern GameConfig config;
 
 static double startTime = 0;
 
@@ -49,8 +49,7 @@ void hw_init(void)
     // 📌 2. Flags ANTES de InitWindow()
     // ------------------------------------------------------------
     SetConfigFlags(FLAG_FULLSCREEN_MODE);
-    // opcional: ventana sin bordes
-    // SetConfigFlags(FLAG_WINDOW_UNDECORATED);
+    SetConfigFlags(FLAG_WINDOW_UNDECORATED);
 
     // ------------------------------------------------------------
     // 📌 3. Crear ventana en fullscreen escalada a 16:9
@@ -80,7 +79,7 @@ const GameConfig *hw_get_config(void)
 // tiempo relativo desde arranque del juego en ms
 uint32_t hw_get_time_ms(void)
 {
-    return (uint32_t)((GetTime() - startTime) * 1000.0);
+    return (uint32_t)((GetTime() - startTime) * 500.0);
 }
 
 // teclado abstracto
