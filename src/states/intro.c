@@ -6,10 +6,10 @@
 #include "config.h"
 
 #define MAX_FRAMES 2000
-#define FRAME_INTERVAL 0.21f
+#define FRAME_INTERVAL 0.20f
 
-#define FADE_DURATION 2.0f
-#define HOLD_DURATION 3.2f
+#define FADE_DURATION 2.7f
+#define HOLD_DURATION 3.7f
 
 // ============================================================================
 // VARIABLES GLOBALES
