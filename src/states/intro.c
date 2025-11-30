@@ -45,8 +45,6 @@ static const char *legalText =
     "La reproducción total o parcial sin autorización está prohibida.\n\n"
     "© 2026 Gachapow. Todos los derechos reservados.";
 
-// Música del intro
-static Music introMusic;
 
 // ============================================================================
 // MEDIR TEXTO MULTILÍNEA
@@ -80,15 +78,6 @@ int MeasureMultilineText(const char *text, int fontSize)
 // ============================================================================
 void Intro_Init()
 {
-    // Cargar música del intro
-    introMusic = LoadMusicStream("assets/audio/game_music.ogg");
-
-    // Usar volumen desde config
-    float baseVol = config.audio.music_volume;
-    SetMusicVolume(introMusic, baseVol);
-
-    PlayMusicStream(introMusic);
-
     // Cargar frames del video
     for (int i = 0; i < MAX_FRAMES; i++)
     {
@@ -126,14 +115,13 @@ void Intro_Init()
 // ============================================================================
 void Intro_Update()
 {
-    UpdateMusicStream(introMusic);
     float dt = GetFrameTime();
 
     switch (step)
     {
     // --------------------------------------------------------------------
     case 0: // Video frame por frame
-            // --------------------------------------------------------------------
+        // --------------------------------------------------------------------
         timer += dt;
 
         if (timer >= FRAME_INTERVAL)
@@ -157,21 +145,6 @@ void Intro_Update()
             timer += dt;
             float totalTime = FADE_DURATION + HOLD_DURATION + FADE_DURATION;
 
-            // Fade out de música en el último paso
-            if (step == 2)
-            {
-                float fadeStart = FADE_DURATION + HOLD_DURATION;
-                if (timer > fadeStart)
-                {
-                    float t = timer - fadeStart;
-                    float alpha = 1.0f - (t / FADE_DURATION);
-                    if (alpha < 0)
-                        alpha = 0;
-                    float baseVol = config.audio.music_volume;
-                    SetMusicVolume(introMusic, alpha * baseVol);
-                }
-            }
-
             if (timer >= totalTime)
             {
                 step++;
@@ -182,8 +155,6 @@ void Intro_Update()
 
     // --------------------------------------------------------------------
     case 3:
-        StopMusicStream(introMusic);
-        SetMusicVolume(introMusic, 1.0f);
         StateManager_Change(STATE_GAMEPLAY);
         break;
     }
@@ -325,5 +296,4 @@ void Intro_Unload()
         UnloadTexture(frames[i]);
 
     UnloadTexture(logo1);
-    UnloadMusicStream(introMusic);
 }
