@@ -1,5 +1,5 @@
 #include "raylib.h"
-#include "states/menu.h"
+#include "menu.h"
 
 void Menu_Enter(void) {
     // Inicialización del menú

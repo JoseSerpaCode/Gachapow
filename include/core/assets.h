@@ -12,6 +12,7 @@ typedef enum {
     TEX_HUD_HALFHEART,
     TEX_HUD_EMPTYHEART,
     TEX_LOGO_GACHAPOW,
+    TEX_MENU_BACKGROUND,
     TEX_COUNT,
 } TextureID;
 

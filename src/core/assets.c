@@ -9,15 +9,16 @@
 static Texture2D textures[TEX_COUNT];
 /* Rutas asociadas a cada TextureID (mantener en el mismo orden que el enum) */
 static const char *asset_paths[TEX_COUNT] = {
-    [TEX_BG_STARS_CLOSE] = "assets/images/background/stars_close.png",
-    [TEX_BG_STARS_FAR]   = "assets/images/background/stars_far.png",
-    [TEX_PLAYER]         = "assets/images/player.png",
-    [TEX_ENEMY]          = "assets/images/enemies/enemy.png",
+    [TEX_BG_STARS_CLOSE] = "assets/images/game/background/stars_close.png",
+    [TEX_BG_STARS_FAR]   = "assets/images/game/background/stars_far.png",
+    [TEX_PLAYER]         = "assets/images/game/player.png",
+    [TEX_ENEMY]          = "assets/images/game/enemies/enemy.png",
     [TEX_LOGO]           = "assets/images/logo.png",
-    [TEX_HUD_FULLHEART]  = "assets/images/hud/hud.png",
-    [TEX_HUD_HALFHEART]  = "assets/images/hud/hud.png",
-    [TEX_HUD_EMPTYHEART] = "assets/images/hud/hud.png",
+    [TEX_HUD_FULLHEART]  = "assets/images/game/hud/hud.png",
+    [TEX_HUD_HALFHEART]  = "assets/images/game/hud/hud.png",
+    [TEX_HUD_EMPTYHEART] = "assets/images/game/hud/hud.png",
     [TEX_LOGO_GACHAPOW]  = "assets/images/logo.png",
+    [TEX_MENU_BACKGROUND]= "assets/images/menu_background.png",
 };
 
 /* Helper: carga una textura y la almacena en el banco */
