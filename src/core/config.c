@@ -31,7 +31,7 @@ bool LoadConfig(const char *filename, GameConfig *config)
     config->intro.enabled = true;
     SAFE_STRCPY(config->intro.musicPath, "assets/music/intro.ogg");
 
-    SAFE_STRCPY(config->font.fontPath, "assets/fonts/default.ttf");
+    SAFE_STRCPY(config->font.fontPath, "assets/fonts/arcade.ttf");
     config->font.fontSize = 24;
 
     SAFE_STRCPY(config->title, "Gachapow");
