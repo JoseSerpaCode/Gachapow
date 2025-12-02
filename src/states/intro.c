@@ -93,7 +93,7 @@ void Intro_Init()
     for (int i = 0; i < MAX_FRAMES; i++)
     {
         char name[64];
-        snprintf(name, sizeof(name), "assets/images/sprites/pixil-frame-%d.png", i);
+        snprintf(name, sizeof(name), "assets/images/sprites/intro/pixil-frame-%d.png", i);
 
         Texture2D t = LoadTexture(name);
 
