@@ -5,27 +5,43 @@
 #include <stdbool.h>
 #include "config.h"
 
-// estado simulado del dispensador físico
+// Estado simulado del dispensador físico
 typedef enum {
     PRIZE_IDLE = 0,
     PRIZE_DISPENSING,
     PRIZE_DONE
 } prize_status_t;
 
-// inicializa plataforma concreta (PC / RPI / etc)
+// ==========================================
+// Inicialización
+// ==========================================
 void hw_init(void);
 
-// tiempo relativo en ms desde init
+// ==========================================
+// Tiempo relativo en ms desde init()
+// ==========================================
 uint32_t hw_get_time_ms(void);
 
-// input abstracto (no amarra a raylib directamente)
+// ==========================================
+// Input abstracto
+// ==========================================
 bool hw_button_pressed(int id);
 
-// simulación / abstracción del dispenser físico real
+// ==========================================
+// Coin mech abstracto
+// (PC -> tecla C, Arcade -> pulso GPIO)
+// ==========================================
+bool hw_coin_inserted(void);
+
+// ==========================================
+// Dispensador (motor real / fake PC)
+// ==========================================
 prize_status_t hw_dispense_request(void);
 void hw_reset_dispense(void);
 
-// retorna puntero a config cargada por hw_init()
+// ==========================================
+// Retorna config cargada
+// ==========================================
 const GameConfig *hw_get_config(void);
 
 #endif
