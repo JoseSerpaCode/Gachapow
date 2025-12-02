@@ -8,11 +8,11 @@
 static GameState current;
 static GameState next;
 
-// Punteros a funciones del estado activo
-static void (*InitFunc)(void);
-static void (*UpdateFunc)(void);
-static void (*DrawFunc)(void);
-static void (*UnloadFunc)(void);
+// Funciones del estado activo
+static StateInitFunc InitFunc;
+static StateUpdateFunc UpdateFunc;
+static StateDrawFunc DrawFunc;
+static StateUnloadFunc UnloadFunc;
 
 static void LoadState(GameState s)
 {
@@ -60,7 +60,6 @@ void StateManager_Init(GameState startState)
 
 void StateManager_UpdateDraw(void)
 {
-    // Cambió el estado → descarga el actual y carga el nuevo
     if (next != current)
     {
         UnloadFunc();
