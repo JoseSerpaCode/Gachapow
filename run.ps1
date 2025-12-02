@@ -1,74 +1,123 @@
-# run.ps1 - Compila todo el proyecto y ejecuta el juego (corregido)
-Write-Host "🔧 Preparando compilación..."
+param(
+    [switch]$pc,
+    [switch]$embedded,
+    [switch]$clean
+)
 
-$PSScriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Definition
-$srcDir = Join-Path $PSScriptRoot "src"
+Write-Host "🔧 Gachapow Build System" -ForegroundColor Cyan
 
-# Recolecta .c recursivamente
-$files = Get-ChildItem -Path $srcDir -Recurse -Filter *.c | ForEach-Object { $_.FullName }
+$root = Split-Path -Parent $MyInvocation.MyCommand.Definition
+$srcDir = Join-Path $root "src"
+$buildDir = Join-Path $root "build"
+$includeDir = Join-Path $root "include"
+$logFile = Join-Path $buildDir "build.log"
+$outExe = Join-Path $buildDir "game.exe"
 
-if (-not $files) {
-    Write-Error "No se encontraron archivos .c en $srcDir"
+# -----------------------------------------
+# CLEAN
+# -----------------------------------------
+if ($clean) {
+    if (Test-Path $buildDir) {
+        Remove-Item -Recurse -Force $buildDir
+        Write-Host "🧹 Build limpiado."
+    } else {
+        Write-Host "No hay build/ para limpiar."
+    }
+    exit 0
+}
+
+# -----------------------------------------
+# SELECCIÓN DE PLATAFORMA
+# -----------------------------------------
+if ($pc -and $embedded) {
+    Write-Host "❌ ERROR: No puedes elegir PC y EMBEDDED simultáneamente." -ForegroundColor Red
     exit 1
 }
 
-# Asegurar build dir
-$buildDir = Join-Path $PSScriptRoot "build"
-if (-not (Test-Path $buildDir)) { New-Item -ItemType Directory -Path $buildDir | Out-Null }
+$platform = ""
+if ($pc)       { $platform = "PC" }
+elseif ($embedded) { $platform = "EMBEDDED" }
+else {
+    Write-Host "⚠️ No se eligió plataforma. Usando PC por defecto."
+    $platform = "PC"
+}
 
-# Includes y libs
+Write-Host "🔎 Plataforma seleccionada: $platform" -ForegroundColor Yellow
+
+# -----------------------------------------
+# LISTA DE ARCHIVOS A COMPILAR
+# -----------------------------------------
+$files = Get-ChildItem -Path $srcDir -Recurse -Filter *.c
+
+switch ($platform) {
+    "PC" {
+        $files = $files | Where-Object { $_.Name -notmatch "hw_embedded.c" }
+        $defines = @("-DHW_PC")
+    }
+    "EMBEDDED" {
+        $files = $files | Where-Object { $_.Name -notmatch "hw_pc.c" }
+        $defines = @("-DHW_EMBEDDED")
+    }
+}
+
+$files = $files | ForEach-Object { $_.FullName }
+
+# -----------------------------------------
+# Preparar build/
+# -----------------------------------------
+if (-not (Test-Path $buildDir)) {
+    New-Item -ItemType Directory -Path $buildDir | Out-Null
+}
+
+# -----------------------------------------
+# FLAGS / LIBS
+# -----------------------------------------
 $includes = @(
-    "-I", (Join-Path $PSScriptRoot "include"),
-    "-I", (Join-Path $PSScriptRoot "include\core"),
-    "-I", (Join-Path $PSScriptRoot "include\extern"),
-    "-I", (Join-Path $PSScriptRoot "include\gameplay"),
-    "-I", (Join-Path $PSScriptRoot "include\states"),
-    "-I", (Join-Path $PSScriptRoot "include\hw")
+    "-I", $includeDir,
+    "-I", "$includeDir/core",
+    "-I", "$includeDir/extern",
+    "-I", "$includeDir/gameplay",
+    "-I", "$includeDir/states",
+    "-I", "$includeDir/hw"
 )
 
-$libs = @("-L", (Join-Path $PSScriptRoot "lib"), "-lraylib", "-lgdi32", "-lwinmm")
+$libs = @(
+    "-L", (Join-Path $root "lib"),
+    "-lraylib",
+    "-lgdi32",
+    "-lwinmm"
+)
+
 $otherFlags = @("-Wall", "-Wextra", "-g")
 
-$outExe = Join-Path $buildDir "game.exe"
-$logFile = Join-Path $buildDir "build.log"
-
-# Construir lista de argumentos (flatten)
+# -----------------------------------------
+# ARMAR ARGUMENTOS GCC
+# -----------------------------------------
 $args = @()
 $args += $files
 $args += $includes
 $args += $libs
+$args += $defines
 $args += $otherFlags
 $args += "-o"
 $args += $outExe
 
-# Mostrar preview
-Write-Host "Archivos a compilar: $($files.Count)"
-Write-Host "Salida: $outExe"
-Write-Host "Guardando log en: $logFile"
-Write-Host "Ejecutando gcc..."
-Write-Host ">> gcc " + ($args -join ' ')
+Write-Host "📦 Compilando $($files.Count) archivos..."
+Write-Host ">> gcc " + ($args -join " ")
 
-# Ejecutar gcc y capturar output (stdout+stderr), volcar a log y a consola
-# Usamos call operator & y redirección 2>&1, luego Tee-Object para log
-$gccPath = "gcc"
-$cmd = "& `"$gccPath`" " + ($args | ForEach-Object { if ($_.Contains(' ')) { '"{0}"' -f $_ } else { $_ } } ) + " 2>&1"
-# Ejecutar comando en un subshell para respetar redirección
-$procOutput = powershell -NoProfile -Command $cmd | Tee-Object -FilePath $logFile
-
-# Obtener exitcode de la última ejecución de gcc
-# Cuando invocamos powershell -Command, $LASTEXITCODE no se propaga automáticamente.
-# Entonces leemos la última línea del log buscando "gcc" exit - mejor: ejecutar gcc directamente y usar $LASTEXITCODE.
-# Para mayor fiabilidad, ejecutemos gcc directamente y luego redirigimos su salida:
-& $gccPath @args 2>&1 | Tee-Object -FilePath $logFile
+# -----------------------------------------
+# EJECUTAR COMPILACIÓN
+# -----------------------------------------
+& gcc @args 2>&1 | Tee-Object -FilePath $logFile
 $exit = $LASTEXITCODE
 
 if ($exit -eq 0) {
-    Write-Host "✅ Compilación exitosa. Ejecutando el juego..."
+    Write-Host "✅ Build exitoso. Ejecutando..." -ForegroundColor Green
     & $outExe
     exit 0
 } else {
-    Write-Host "❌ Error de compilación. Revisa $logFile"
-    Write-Host "`nÚltimas 40 líneas de log:`n"
-    Get-Content $logFile -Tail 40 | ForEach-Object { Write-Host $_ }
+    Write-Host "❌ Error de compilación." -ForegroundColor Red
+    Write-Host "📄 Últimas 40 líneas del log:"
+    Get-Content $logFile -Tail 40
     exit $exit
 }
