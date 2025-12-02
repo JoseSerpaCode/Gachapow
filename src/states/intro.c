@@ -22,7 +22,7 @@ static Texture2D frames[MAX_FRAMES];
 static int totalFrames = 0;       // Total de frames cargados
 
 // Logo principal a mostrar después del video
-static Texture2D logo1;
+static Texture2D logoGachapow;
 
 // Estado actual del intro:
 // 0 = mostrando video
@@ -107,10 +107,10 @@ void Intro_Init()
     // -------------------
     // CARGAR EL LOGO
     // -------------------
-    logo1 = GetTextureAsset(TEX_LOGO_GACHAPOW);
+    logoGachapow = GetTextureAsset(TEX_LOGO_GACHAPOW);
 
     // Filtro pixelado (mejor para logos estilo retro)
-    SetTextureFilter(logo1, TEXTURE_FILTER_POINT);
+    SetTextureFilter(logoGachapow, TEXTURE_FILTER_POINT);
 
     // Resetear variables
     step = 0;
@@ -179,8 +179,8 @@ void Intro_Update()
         break;
 
     // --------------------------------------------------------------------
-    case 3: // Finaliza intro → Gameplay
-        StateManager_Change(STATE_GAMEPLAY);
+    case 3: // Finaliza intro → Menú
+        StateManager_Change(STATE_MENU);
         break;
     }
 }
@@ -231,7 +231,7 @@ void Intro_Draw()
     case 1: // LOGO
         // --------------------------------------------------------------------
         {
-            Texture2D tex = logo1;
+            Texture2D tex = logoGachapow;
 
             // Calcular alpha según el tiempo (fade-in/hold/fade-out)
             float alpha;
@@ -337,5 +337,5 @@ void Intro_Unload()
         UnloadTexture(frames[i]);
 
     // Liberar el logo
-    UnloadTexture(logo1);
+    UnloadTexture(logoGachapow);
 }

@@ -3,9 +3,10 @@
 
 typedef enum {
     STATE_INTRO,
+    STATE_MENU,
     STATE_GAMEPLAY
+    //STATE_GAMEOVER
 } GameState;
-
 
 void StateManager_Init(GameState startState);
 void StateManager_UpdateDraw(void);
