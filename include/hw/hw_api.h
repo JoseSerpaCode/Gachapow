@@ -26,6 +26,7 @@ uint32_t hw_get_time_ms(void);
 // Input abstracto
 // ==========================================
 bool hw_button_pressed(int id);
+bool hw_any_button_pressed(void);
 
 // ==========================================
 // Coin mech abstracto

@@ -7,12 +7,19 @@
 #include <stdio.h>
 #include <math.h>
 
+// =============================================
+// Intervalos de animación para los 3 intros
+// =============================================
 #define FRAME_INTERVAL_1 0.10f
 #define FRAME_INTERVAL_2 0.20f
 #define FRAME_INTERVAL_3 0.20f
 
-#define MENU_TIMEOUT 6.0f
+// Tiempo antes de reiniciar attract mode cuando está en menú
+#define MENU_TIMEOUT 15.0f    // <--- antes era 6s
 
+// =============================================
+// Variables internas
+// =============================================
 static float timer = 0.0f;
 static float globalTimer = 0.0f;
 static int step = 0;
@@ -20,6 +27,15 @@ static int currentFrame = 0;
 
 static Texture2D menu_background;
 
+// Estado del sistema de monedas
+static bool coinInserted = false;       // Se insertó al menos una moneda
+static float coinFlashTimer = 0.0f;     // Parpadeo rápido 1s
+static bool readyToStart = false;       // Mostrar el mensaje final
+
+
+// =====================================================
+// Referencias externas a las animaciones
+// =====================================================
 extern Texture2D intro1_frames[];
 extern Texture2D intro2_frames[];
 extern Texture2D intro3_frames[];
@@ -30,7 +46,7 @@ extern int intro3_frames_count;
 
 
 // =====================================================
-// Frame centrado y escalado estable
+// Dibuja un frame escalado y centrado a pantalla
 // =====================================================
 static void DrawFrameCentered(Texture2D tex)
 {
@@ -57,10 +73,15 @@ static void DrawFrameCentered(Texture2D tex)
 void Menu_Init(void)
 {
     menu_background = GetTextureAsset(TEX_MENU_BACKGROUND);
-    timer = 0.0f;
-    globalTimer = 0.0f;
+
+    timer = 0;
+    globalTimer = 0;
     step = 0;
     currentFrame = 0;
+
+    coinInserted = false;
+    coinFlashTimer = 0;
+    readyToStart = false;
 }
 
 
@@ -70,39 +91,86 @@ void Menu_Update(void)
     float dt = GetFrameTime();
     timer += dt;
 
-    // Cuando ya mostramos menú final → permitimos loop del attract mode
-    if (step == 13)
+    // =====================================================
+    // 1) Detectar moneda EN CUALQUIER ETAPA
+    // =====================================================
+    if (!coinInserted && hw_coin_inserted())
+    {
+        coinInserted = true;
+        coinFlashTimer = 1.0f;        // parpadeo rápido 1s
+        step = 13;                    // forzar menú estático al instante
+        timer = 0;
+        globalTimer = 0;
+    }
+
+    // =====================================================
+    // 2) Manejo del parpadeo rápido
+    // =====================================================
+    if (coinInserted && coinFlashTimer > 0)
+    {
+        coinFlashTimer -= dt;
+        if (coinFlashTimer <= 0)
+            readyToStart = true;
+    }
+
+    // =====================================================
+    // 3) Si ya está listo, cualquier input inicia el juego
+    // =====================================================
+    if (readyToStart)
+    {
+        if (hw_any_button_pressed() || IsKeyPressed(KEY_ENTER))
+        {
+            StateManager_Change(STATE_GAMEPLAY);
+            return;
+        }
+    }
+
+    // =====================================================
+    // 4) Manejo del timeout para reiniciar attract mode
+    // =====================================================
+    if (step == 13)   // solo cuando estamos en el menú final
     {
         globalTimer += dt;
+
         if (globalTimer >= MENU_TIMEOUT)
         {
+            // Reinicio total de animaciones
             step = 0;
             timer = 0;
             currentFrame = 0;
             globalTimer = 0;
+
+            // Si NO hay moneda, reiniciamos mensajes
+            if (!coinInserted)
+            {
+                readyToStart = false;
+                coinFlashTimer = 0;
+            }
         }
     }
-    else {
-        globalTimer = 0;
+    else
+    {
+        globalTimer = 0; // no cuenta si estamos en animaciones
     }
 
-    // Máquina de estados del attract mode
+    // =====================================================
+    // 5) Secuencia clásica del attract mode (animaciones)
+    // =====================================================
     switch (step)
     {
         case 0:
-            currentFrame = 0;
             step = 1;
+            currentFrame = 0;
             break;
 
         case 1:
             if (timer >= FRAME_INTERVAL_1)
             {
                 timer = 0;
-                currentFrame++;
-                if (currentFrame >= intro1_frames_count)
+                if (++currentFrame >= intro1_frames_count)
                 {
-                    currentFrame = 0;
                     step = 5;
+                    currentFrame = 0;
                 }
             }
             break;
@@ -111,11 +179,10 @@ void Menu_Update(void)
             if (timer >= FRAME_INTERVAL_2)
             {
                 timer = 0;
-                currentFrame++;
-                if (currentFrame >= intro2_frames_count)
+                if (++currentFrame >= intro2_frames_count)
                 {
-                    currentFrame = 0;
                     step = 9;
+                    currentFrame = 0;
                 }
             }
             break;
@@ -124,10 +191,8 @@ void Menu_Update(void)
             if (timer >= FRAME_INTERVAL_3)
             {
                 timer = 0;
-                currentFrame++;
-                if (currentFrame >= intro3_frames_count)
+                if (++currentFrame >= intro3_frames_count)
                 {
-                    currentFrame = 0;
                     step = 12;
                 }
             }
@@ -136,17 +201,8 @@ void Menu_Update(void)
         case 12:
             if (timer >= 2.0f)
             {
-                timer = 0;
                 step = 13;
-            }
-            break;
-
-        case 13:
-            // Aquí ya estamos en menú final
-            // COIN MECH UNIVERSAL
-            if (hw_coin_inserted())
-            {
-                StateManager_Change(STATE_GAMEPLAY);
+                timer = 0;
             }
             break;
     }
@@ -156,14 +212,13 @@ void Menu_Update(void)
 // =====================================================
 void Menu_Draw(void)
 {
+    BeginDrawing();
+    ClearBackground(BLACK);
+
     int sw = GetScreenWidth();
     int sh = GetScreenHeight();
 
-    if (step == 13)
-        BeginDrawing(), ClearBackground(BLACK);
-    else
-        BeginDrawing();
-
+    // Dibujo del attract mode
     switch (step)
     {
         case 1:  DrawFrameCentered(intro1_frames[currentFrame]); break;
@@ -173,21 +228,41 @@ void Menu_Draw(void)
         case 13: DrawFrameCentered(menu_background); break;
     }
 
-    // ================================
-    // INSERT COIN animado
-    // ================================
-    if (step == 13)
-    {
-        float pulse = 1.0f + 0.06f * sinf(GetTime() * 6.0f);
-        int size = (int)(42 * pulse);
 
-        const char* msg = "INSERT COIN";
+    // =====================================================
+    // TEXTO: INSERT COIN / PRESS BUTTON TO START
+    // =====================================================
+    if (true)  // SIEMPRE visible en menú estático
+    {
+        float pulse = sinf(GetTime() * (coinFlashTimer > 0 ? 16.0f : 6.0f));
+        float scale = 1.0f + 0.06f * pulse;
+        int size = (int)(42 * scale);
+
+        const char* msg;
+
+        if (!coinInserted)
+            msg = "INSERT COIN";
+        else if (!readyToStart)
+            msg = "INSERT COIN"; // pero parpadeo rápido
+        else
+            msg = "PRESIONA UN BOTON PARA CONTINUAR";
+
+        Color glow, main;
+
+        if (!readyToStart)
+        {
+            glow = (Color){255,255,180,200};
+            main = (Color){255,255,120,255};
+        }
+        else
+        {
+            glow = (Color){255,140,40,255};
+            main = (Color){255,90,0,255};
+        }
+
         int tw = MeasureText(msg, size);
         int x = sw/2 - tw/2;
         int y = sh - 95;
-
-        Color glow = {255, 255, 180, 200};
-        Color main = {255, 255, 120, 255};
 
         DrawText(msg, x+3, y+3, size, glow);
         DrawText(msg, x,   y,   size, main);
@@ -198,4 +273,7 @@ void Menu_Draw(void)
 
 
 // =====================================================
-void Menu_Unload(void) {}
+void Menu_Unload(void)
+{
+    // El sistema de assets gestiona las texturas
+}

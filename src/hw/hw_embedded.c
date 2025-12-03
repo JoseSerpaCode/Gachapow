@@ -84,3 +84,15 @@ void hw_reset_dispense(void)
 {
     gpio_write(PIN_DISPENSER, false);
 }
+
+
+bool hw_any_button_pressed(void)
+{
+    if (hw_button_pressed(0)) return true;
+    if (hw_button_pressed(1)) return true;
+
+    // Si tienes más botones físicos:
+    // if (gpio_read(PIN_BUTTON3) == 0) return true;
+
+    return false;
+}

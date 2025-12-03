@@ -116,3 +116,17 @@ void hw_reset_dispense(void)
     dispensing = false;
     dispenseStart = 0.0;
 }
+
+bool hw_any_button_pressed(void)
+{
+    for (int i = 0; i < 3; i++)
+        if (hw_button_pressed(i))
+            return true;
+
+    if (IsGamepadAvailable(0))
+        for (int b = 0; b < 16; b++)
+            if (IsGamepadButtonPressed(0, b))
+                return true;
+
+    return false;
+}
