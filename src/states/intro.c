@@ -3,6 +3,7 @@
 #include "raylib.h"
 #include "assets.h"
 #include "config.h"
+#include "hw_api.h"
 #include <stdio.h>
 #include <math.h>
 
@@ -133,6 +134,16 @@ void Intro_Update()
 {
     float dt = GetFrameTime();
     timer += dt;
+
+    // ----------------------------------------------------------------
+    // SKIP INTRO: si se presiona cualquier botón, salta al menú
+    // ----------------------------------------------------------------
+    if (hw_any_button_pressed() || IsKeyPressed(KEY_ENTER))
+    {
+        StateManager_Change(STATE_MENU);
+        return;
+    }
+    // ----------------------------------------------------------------
 
     switch (step)
     {

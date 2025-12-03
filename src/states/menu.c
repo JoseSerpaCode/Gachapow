@@ -15,7 +15,7 @@
 #define FRAME_INTERVAL_3 0.20f
 
 // Tiempo antes de reiniciar attract mode cuando está en menú
-#define MENU_TIMEOUT 15.0f    // <--- antes era 6s
+#define MENU_TIMEOUT 30.0f    // <--- antes era 6s
 
 // =============================================
 // Variables internas
