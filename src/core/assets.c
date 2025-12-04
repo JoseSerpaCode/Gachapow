@@ -40,9 +40,6 @@ int intro1_frames_count = 0;
 Texture2D intro2_frames[MAX_ANIM_FRAMES];
 int intro2_frames_count = 0;
 
-Texture2D intro3_frames[MAX_ANIM_FRAMES];
-int intro3_frames_count = 0;
-
 // ============================================================================
 // CARGA INTERNA DE TEXTURA
 // ============================================================================
@@ -132,7 +129,6 @@ void Assets_Init(void)
     // Cargar animaciones
     Assets_LoadAnimation("assets/animations/menu_intro1", intro1_frames, &intro1_frames_count);
     Assets_LoadAnimation("assets/animations/menu_intro2", intro2_frames, &intro2_frames_count);
-    Assets_LoadAnimation("assets/animations/menu_intro3", intro3_frames, &intro3_frames_count);
 }
 
 // ============================================================================
@@ -173,5 +169,4 @@ void Assets_Unload(void)
 
     Assets_UnloadAnimation(intro1_frames, intro1_frames_count);
     Assets_UnloadAnimation(intro2_frames, intro2_frames_count);
-    Assets_UnloadAnimation(intro3_frames, intro3_frames_count);
 }

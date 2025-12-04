@@ -40,9 +40,6 @@ extern int intro1_frames_count;
 extern Texture2D intro2_frames[MAX_ANIM_FRAMES];
 extern int intro2_frames_count;
 
-extern Texture2D intro3_frames[MAX_ANIM_FRAMES];
-extern int intro3_frames_count;
-
 // Carga automática de frames numerados dentro de una carpeta
 bool Assets_LoadAnimation(const char *folder, Texture2D outFrames[], int *outCount);
 

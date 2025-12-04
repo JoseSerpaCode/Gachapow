@@ -8,14 +8,13 @@
 #include <math.h>
 
 // =============================================
-// Intervalos de animación para los 3 intros
+// Intervalos de animación para los 2 intros
 // =============================================
 #define FRAME_INTERVAL_1 0.10f
-#define FRAME_INTERVAL_2 0.20f
-#define FRAME_INTERVAL_3 0.20f
+#define FRAME_INTERVAL_2 0.15f
 
 // Tiempo antes de reiniciar attract mode cuando está en menú
-#define MENU_TIMEOUT 30.0f    // <--- antes era 6s
+#define MENU_TIMEOUT 50.0f //
 
 // =============================================
 // Variables internas
@@ -28,22 +27,18 @@ static int currentFrame = 0;
 static Texture2D menu_background;
 
 // Estado del sistema de monedas
-static bool coinInserted = false;       // Se insertó al menos una moneda
-static float coinFlashTimer = 0.0f;     // Parpadeo rápido 1s
-static bool readyToStart = false;       // Mostrar el mensaje final
-
+static bool coinInserted = false;   // Se insertó al menos una moneda
+static float coinFlashTimer = 0.0f; // Parpadeo rápido 1s
+static bool readyToStart = false;   // Mostrar el mensaje final
 
 // =====================================================
 // Referencias externas a las animaciones
 // =====================================================
 extern Texture2D intro1_frames[];
 extern Texture2D intro2_frames[];
-extern Texture2D intro3_frames[];
 
 extern int intro1_frames_count;
 extern int intro2_frames_count;
-extern int intro3_frames_count;
-
 
 // =====================================================
 // Dibuja un frame escalado y centrado a pantalla
@@ -61,13 +56,11 @@ static void DrawFrameCentered(Texture2D tex)
         (sw - tex.width * scale) * 0.5f,
         (sh - tex.height * scale) * 0.5f,
         tex.width * scale,
-        tex.height * scale
-    };
+        tex.height * scale};
 
-    DrawTexturePro(tex, (Rectangle){0,0,tex.width,tex.height}, dst,
-                   (Vector2){0,0}, 0, WHITE);
+    DrawTexturePro(tex, (Rectangle){0, 0, tex.width, tex.height}, dst,
+                   (Vector2){0, 0}, 0, WHITE);
 }
-
 
 // =====================================================
 void Menu_Init(void)
@@ -84,7 +77,6 @@ void Menu_Init(void)
     readyToStart = false;
 }
 
-
 // =====================================================
 void Menu_Update(void)
 {
@@ -97,8 +89,8 @@ void Menu_Update(void)
     if (!coinInserted && hw_coin_inserted())
     {
         coinInserted = true;
-        coinFlashTimer = 1.0f;        // parpadeo rápido 1s
-        step = 13;                    // forzar menú estático al instante
+        coinFlashTimer = 1.0f; // parpadeo rápido 1s
+        step = 13;             // forzar menú estático al instante
         timer = 0;
         globalTimer = 0;
     }
@@ -128,7 +120,7 @@ void Menu_Update(void)
     // =====================================================
     // 4) Manejo del timeout para reiniciar attract mode
     // =====================================================
-    if (step == 13)   // solo cuando estamos en el menú final
+    if (step == 13) // solo cuando estamos en el menú final
     {
         globalTimer += dt;
 
@@ -154,60 +146,44 @@ void Menu_Update(void)
     }
 
     // =====================================================
-    // 5) Secuencia clásica del attract mode (animaciones)
+    // 5) Secuencia clásica del attract mode
     // =====================================================
     switch (step)
     {
-        case 0:
-            step = 1;
-            currentFrame = 0;
-            break;
+    case 0:
+        step = 1;
+        currentFrame = 0;
+        break;
 
-        case 1:
-            if (timer >= FRAME_INTERVAL_1)
+    case 1: // intro1
+        if (timer >= FRAME_INTERVAL_1)
+        {
+            timer = 0;
+            if (++currentFrame >= intro1_frames_count)
             {
-                timer = 0;
-                if (++currentFrame >= intro1_frames_count)
-                {
-                    step = 5;
-                    currentFrame = 0;
-                }
+                step = 5;
+                currentFrame = 0;
             }
-            break;
+        }
+        break;
 
-        case 5:
-            if (timer >= FRAME_INTERVAL_2)
+    case 5: // intro2
+        if (timer >= FRAME_INTERVAL_2)
+        {
+            timer = 0;
+            if (++currentFrame >= intro2_frames_count)
             {
-                timer = 0;
-                if (++currentFrame >= intro2_frames_count)
-                {
-                    step = 9;
-                    currentFrame = 0;
-                }
-            }
-            break;
-
-        case 9:
-            if (timer >= FRAME_INTERVAL_3)
-            {
-                timer = 0;
-                if (++currentFrame >= intro3_frames_count)
-                {
-                    step = 12;
-                }
-            }
-            break;
-
-        case 12:
-            if (timer >= 2.0f)
-            {
-                step = 13;
+                step = 13; // ← salto directo al menú estático
                 timer = 0;
             }
-            break;
+        }
+        break;
+
+    case 13: // menú estático
+        // (el timeout del attract mode se maneja arriba)
+        break;
     }
 }
-
 
 // =====================================================
 void Menu_Draw(void)
@@ -221,24 +197,27 @@ void Menu_Draw(void)
     // Dibujo del attract mode
     switch (step)
     {
-        case 1:  DrawFrameCentered(intro1_frames[currentFrame]); break;
-        case 5:  DrawFrameCentered(intro2_frames[currentFrame]); break;
-        case 9:  DrawFrameCentered(intro3_frames[currentFrame]); break;
-        case 12: DrawFrameCentered(intro3_frames[intro3_frames_count - 1]); break;
-        case 13: DrawFrameCentered(menu_background); break;
+    case 1:
+        DrawFrameCentered(intro1_frames[currentFrame]);
+        break;
+    case 5:
+        DrawFrameCentered(intro2_frames[currentFrame]);
+        break;
+    case 13:
+        DrawFrameCentered(menu_background);
+        break;
     }
-
 
     // =====================================================
     // TEXTO: INSERT COIN / PRESS BUTTON TO START
     // =====================================================
-    if (true)  // SIEMPRE visible en menú estático
+    if (true) // SIEMPRE visible en menú estático
     {
         float pulse = sinf(GetTime() * (coinFlashTimer > 0 ? 16.0f : 6.0f));
         float scale = 1.0f + 0.06f * pulse;
         int size = (int)(42 * scale);
 
-        const char* msg;
+        const char *msg;
 
         if (!coinInserted)
             msg = "INSERT COIN";
@@ -251,26 +230,25 @@ void Menu_Draw(void)
 
         if (!readyToStart)
         {
-            glow = (Color){255,255,180,200};
-            main = (Color){255,255,120,255};
+            glow = (Color){255, 255, 180, 200};
+            main = (Color){255, 255, 120, 255};
         }
         else
         {
-            glow = (Color){255,140,40,255};
-            main = (Color){255,90,0,255};
+            glow = (Color){255, 140, 40, 255};
+            main = (Color){255, 90, 0, 255};
         }
 
         int tw = MeasureText(msg, size);
-        int x = sw/2 - tw/2;
+        int x = sw / 2 - tw / 2;
         int y = sh - 95;
 
-        DrawText(msg, x+3, y+3, size, glow);
-        DrawText(msg, x,   y,   size, main);
+        DrawText(msg, x + 3, y + 3, size, glow);
+        DrawText(msg, x, y, size, main);
     }
 
     EndDrawing();
 }
-
 
 // =====================================================
 void Menu_Unload(void)
