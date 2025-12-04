@@ -10,8 +10,8 @@
 // =============================================
 // Intervalos de animación para los 2 intros
 // =============================================
-#define FRAME_INTERVAL_1 0.10f
-#define FRAME_INTERVAL_2 0.15f
+#define FRAME_INTERVAL_1 0.07f
+#define FRAME_INTERVAL_2 0.10f
 
 // Tiempo antes de reiniciar attract mode cuando está en menú
 #define MENU_TIMEOUT 50.0f //
