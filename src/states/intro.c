@@ -11,10 +11,10 @@
 // CONSTANTES
 // ============================================================================
 #define MAX_FRAMES       2000
-#define FRAME_INTERVAL   0.20f
+#define FRAME_INTERVAL   0.15f
 
-#define FADE_DURATION    2.7f
-#define HOLD_DURATION    3.7f
+#define FADE_DURATION    1.5f
+#define HOLD_DURATION    2.5f
 
 // ============================================================================
 // ENUMERACIONES Y ESTRUCTURAS
