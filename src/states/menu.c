@@ -188,7 +188,6 @@ void Menu_Update(void)
 // =====================================================
 void Menu_Draw(void)
 {
-    BeginDrawing();
     ClearBackground(BLACK);
 
     int sw = GetScreenWidth();
@@ -246,8 +245,6 @@ void Menu_Draw(void)
         DrawText(msg, x + 3, y + 3, size, glow);
         DrawText(msg, x, y, size, main);
     }
-
-    EndDrawing();
 }
 
 // =====================================================

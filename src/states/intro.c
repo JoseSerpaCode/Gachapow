@@ -184,7 +184,6 @@ void Intro_Update()
 // ============================================================================
 void Intro_Draw()
 {
-    BeginDrawing();
     ClearBackground(BLACK);
 
     int sw = GetScreenWidth();
@@ -253,8 +252,6 @@ void Intro_Draw()
         default:
             break;
     }
-
-    EndDrawing();
 }
 
 // ============================================================================

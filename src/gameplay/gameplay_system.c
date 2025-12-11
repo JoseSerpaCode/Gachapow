@@ -215,7 +215,6 @@ void UpdateGame(void)
 /* Draw */
 void DrawGame(void)
 {
-    BeginDrawing();
     ClearBackground(RAYWHITE);
 
     DrawBackground();
@@ -268,8 +267,6 @@ void DrawGame(void)
 
     /* --- HUD dibujado al final para que quede encima de todo --- */
     DrawHUD(GS.score, GS.elapsedTime, GS.player.lives);
-
-    EndDrawing();
 }
 
 /* Unload */

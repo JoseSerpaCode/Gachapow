@@ -12,11 +12,9 @@ void GameOver_Update(void) {
 }
 
 void GameOver_Draw(void) {
-    BeginDrawing();
     ClearBackground(MAROON);
     DrawText("GAME OVER", 180, 300, 30, WHITE);
     DrawText("Presiona ENTER para volver al menú", 80, 360, 20, GRAY);
-    EndDrawing();
 }
 
 void GameOver_Exit(void) {
