@@ -1,55 +1,75 @@
-# Prerequisites
+# ===================================
+# Compilación y build
+# ===================================
 *.d
-
-# Object files
 *.o
-*.ko
 *.obj
 *.elf
-
-# Linker output
 *.ilk
 *.map
 *.exp
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Libraries
 *.lib
 *.a
 *.la
 *.lo
-
-# Shared objects (inc. Windows DLLs)
 *.dll
 *.so
 *.so.*
 *.dylib
-
-# Executables
 *.exe
 *.out
 *.app
 *.i*86
 *.x86_64
 *.hex
-
-# Debug files
+*.pdb
 *.dSYM/
 *.su
 *.idb
-*.pdb
-
-# Kernel Module Compile Results
-*.mod*
-*.cmd
-.tmp_versions/
-modules.order
-Module.symvers
-Mkfile.old
-dkms.conf
-
-# debug information files
 *.dwo
+
+# Carpetas de salida
+build/
+bin/
+obj/
+out/
+dist/
+*.log
+
+# ===================================
+# Archivos temporales / de sistema
+# ===================================
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ===================================
+# IDEs / entornos
+# ===================================
+.vscode/
+.idea/
+*.code-workspace
+
+# ===================================
+# Archivos grandes o editables (NO código fuente)
+# ===================================
+
+# Ignorar solo recursos de edición, no los finales del juego
+assets/temp/
+assets/*.xcf
+assets/*.psd
+
+# Pero mantener los archivos necesarios para el juego:
+!assets/data/config.json
+!assets/fonts/**
+!assets/images/**
+!assets/audio/**
+
+# ===================================
+# Raylib-specific
+# ===================================
+raylib/projects/
+raylib/bin/
+raylib/obj/

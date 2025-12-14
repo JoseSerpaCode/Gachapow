@@ -1,0 +1,26 @@
+{
+    "screen": {
+        "width": 1280,
+        "height": 720,
+        "fullscreen": true,
+        "fps": 60
+    },
+
+    "audio": {
+        "master_volume": 1.0,
+        "music_volume": 0.9,
+        "sfx_volume": 1.0
+    },
+
+    "intro": {
+        "enabled": true,
+        "music": "assets/music/intro.ogg"
+    },
+
+    "font": {
+        "path": "assets/fonts/arcade.ttf",
+        "size": 24
+    },
+
+    "window_title": "Gachapow"
+}
