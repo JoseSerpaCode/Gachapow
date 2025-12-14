@@ -3,7 +3,7 @@
 # 🎮 Gachapow V2.0
 
 > **Versión actual:** `v1.1.0-prealpha`  
-> **Estado:** En desarrollo (Pre-Alpha)  
+> **Estado:** En desarrollo (Alpha)  
 > **Repositorio oficial del proyecto Gachapow V2.0**
 
 ---
@@ -42,8 +42,8 @@ control de memoria, sincronización, periféricos, temporización y gráficos si
 
 | Etapa | Versión | Estado | Descripción breve |
 |--------|----------|---------|--------------------|
-| **Pre-Alpha** | `v1.1.0-prealpha` | 🟢 Activa | Fundamentos del juego y del sistema de premios físico. |
-| **Alpha** | `v1.3.0-alpha` | 🔜 Planeada | Core funcional completo y arquitectura validada. |
+| **Pre-Alpha** | `v1.1.0-prealpha` | 🟢 Activo | Fundamentos del juego y del sistema de premios físico. |
+| **Alpha** | `v1.3.0-alpha` | 🟡 En desarrollo | Core funcional completo y arquitectura validada. |
 | **Beta** | `v1.6.0-beta` | 🔜 Pendiente | Integración total en MCU + PCB prototipo funcional. |
 | **Release Candidate** | `v1.9.0-rc1` | 🔜 Pendiente | Versión casi final con QA aprobado. |
 | **Final / Gold** | `v2.0.0` | 🔜 Objetivo | Producto final listo para presentación y réplica. |
