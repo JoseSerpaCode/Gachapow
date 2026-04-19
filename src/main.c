@@ -3,14 +3,19 @@
 #include "state_manager.h"
 #include "assets.h"
 
-#include <direct.h>
+#ifdef _WIN32
+    #include <direct.h>
+#else
+    #include <unistd.h>
+#endif
+
 #include <stdio.h>
 
 int main(void)
 {
     // Verificación de ruta (tu código)
     FILE *file = fopen("assets/data/config.json", "r");
-    if (!file) _chdir("..");
+    if (!file) chdir("..");
     else fclose(file);
 
     hw_init();
